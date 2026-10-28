@@ -1,6 +1,6 @@
 # Event abstraction and timed norms for USPTO patent prosecution
 
-This repository accompanies the article *Where does bureaucracy debt arise? Process mining of U.S. patent examination* (Minsu Cho, manuscript under review). It provides the two inputs that turn raw USPTO transaction records into an event log and check that log against the norms governing examination:
+This repository accompanies the anonymized article. It provides the two inputs that turn raw USPTO transaction records into an event log and check that log against the norms governing examination:
 
 - `mapping/`: the event abstraction, which maps 96 PatEx transaction codes to 37 core and 19 friction activities (Table S1 of the article), and the mail-room codes that supply the mailing dates of examiner actions.
 - `norms/`: the eleven timed norms of the article (Table 1) in machine-readable form, with the activation, target and superseding events and the deadline of each norm.
@@ -56,3 +56,5 @@ Deadlines run from the mailing date of an action. For the examiner actions liste
 | O2 | MPEP 710.06 | Office | Office action not withdrawn or vacated |
 
 Each norm is a timed response constraint in the style of multi-perspective Declare. For an activation, the first later event in the target or superseding set is located. The activation is resolved if that event is a target and violated if it occurs after the deadline. Superseded activations are excluded, and the violation rate is the share of violated activations among resolved ones. Applicant deadlines carry three days of grace for periods that end on weekends or holidays. R1, R2, B, O1 and O2 depart from this template, and `norms.yaml` states their rules. Activity sets referenced with `$` are defined at the top of the file.
+
+Released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
