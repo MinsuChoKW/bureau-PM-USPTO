@@ -1,0 +1,97 @@
+event_code,activity,category,tie_order,note
+DOCK,Docketed to Examiner,core,1,also re-docketing after transfer
+CTRS,Restriction Requirement,core,2,
+ELC.,Election Response,core,3,
+CTNF,Non-Final Rejection,core,4,
+SRNF,Non-Final Rejection,core,5,supplemental
+FAIA,Non-Final Rejection,core,6,First Action Interview OA
+FAOO,Non-Final Rejection,core,7,FAI alternate first action
+A...,Response to Non-Final,core,8,
+CTFR,Final Rejection,core,9,
+A.NE,Response to Final,core,10,
+CTAV,Advisory Action,core,11,after-final response not leading to allowance
+RAFC,AFCP Request,core,12,After Final Consideration Pilot
+AFAC,AFCP Considered,core,13,
+AFNE,AFCP Denied,core,14,amendment too extensive
+AFIR,AFCP Denied,core,15,improper request
+RCEX,RCE Filed,core,16,ABN9/BRCE/FRCE are workflow artifacts of the same RCE
+QRCE,RCE Filed,core,17,Quick Path IDS examiner-directed RCE
+CTEQ,Quayle Action,core,18,
+A.QU,Response to Quayle,core,19,
+EXAT,Interview,core,20,
+EXIA,Interview,core,21,
+EXIE,Interview,core,22,
+EXET,Interview,core,23,
+EXAP,Interview,core,24,
+EXAC,Interview,core,25,
+EXEP,Interview,core,26,
+EXEC,Interview,core,27,
+EXIN,Interview,core,28,
+PICO,Interview,core,29,FAI pre-interview communication
+N/AP,Notice of Appeal,core,30,
+AP.C,Pre-Appeal Request,core,31,
+AP.C3,Pre-Appeal Request,core,32,
+APCP,Pre-Appeal: Proceed,core,33,
+APCR,Pre-Appeal: Reopen,core,34,
+APCA,Pre-Appeal: Rejection Withdrawn,core,35,
+AP.B,Appeal Brief,core,36,
+APEA,Examiner's Answer,core,37,
+APE2,Examiner's Answer,core,38,2nd or subsequent
+APRB,Reply Brief,core,39,
+APDA,PTAB: Affirmed,core,40,
+APDP,PTAB: Affirmed in Part,core,41,
+APDR,PTAB: Reversed,core,42,
+MAPDN,PTAB: New Grounds,core,43,only Mail code exists
+APDS,Appeal Dismissed,core,44,
+AP/A,Response to Non-Final,core,45,amendment after notice of appeal (reopens)
+BD.A,Response to Non-Final,core,46,amendment after PTAB decision
+N/=.,Notice of Allowance,core,47,
+W/N=,Withdrawal of Allowance,core,48,
+IFEE,Issue Fee Paid,core,49,
+ABN2,Abandoned: No Response,core,50,
+ABN6,Abandoned: Issue Fee Unpaid,core,51,
+ABN10,Abandoned: After Appeal,core,52,
+ABN3,Abandoned: Express,core,53,
+ABN4,Abandoned: Express,core,54,after allowance
+ABN11,Abandoned: Express,core,55,withdraw from issue for express abandonment
+EABN,Abandoned: Express,core,56,letter of express abandonment
+ABN7,Abandoned: Formalities,core,57,
+ABNX,Abandoned: Formalities,core,58,during pre-exam
+ABNF,Abandoned: Formalities,core,59,
+PREV,Revived,core,60,
+NRAB,Revived,core,61,rescinded abandonment
+WIDS,IDS Filed,friction,62,
+EIDS.,IDS Filed,friction,63,
+M844,IDS Filed,friction,64,
+QPREQ,IDS Filed,friction,65,Quick Path IDS
+XT/G,Extension of Time,friction,66,
+A.I.,Informal Amendment Notice,friction,67,
+CPA-AMD,Informal Amendment Notice,friction,68,RCE amendment non-responsive
+INCR,Incomplete Reply Notice,friction,69,
+TI1050,Transfer Between Art Units,friction,70,handover
+PET.,Petition Filed,friction,71,
+PET2,Petition Filed,friction,72,
+PTGR,Petition Decided,friction,73,
+PTDI,Petition Decided,friction,74,
+PTDE,Petition Decided,friction,75,
+PTDI-1,Petition Decided,friction,76,
+DIST,Terminal Disclaimer,friction,77,
+P575,Terminal Disclaimer Rejected,friction,78,
+A.PE,Preliminary Amendment,friction,79,
+SA..,Supplemental Response,friction,80,
+A.NA,Rule 312 Amendment,friction,81,amendment after allowance
+CNOA,Corrected Notice of Allowability,friction,82,
+C/N=,Corrected Notice of Allowability,friction,83,
+C/NW,Corrected Notice of Allowability,friction,84,
+W/AC,Office Action Withdrawn,friction,85,examiner vacates own action
+WFIS,Withdrawn from Issue,friction,86,
+M327,Misc. Communication,friction,87,
+APBD,Defective Appeal Brief,friction,88,
+APBI,Defective Appeal Brief,friction,89,
+APND,Defective Appeal Brief,friction,90,defective notice of appeal
+NAPI,Defective Appeal Brief,friction,91,
+APCD,Defective Appeal Brief,friction,92,defective pre-appeal request
+IRCE,Improper RCE,friction,93,
+AISP,Suspension,friction,94,
+L.SP,Suspension,friction,95,
+L.SI,Suspension,friction,96,

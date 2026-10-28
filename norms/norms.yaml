@@ -1,0 +1,220 @@
+# Timed norms checked against USPTO patent prosecution histories.
+# Accompanies "Where does bureaucracy debt arise? Process mining of U.S. patent examination" (Table 1).
+#
+# Activity names follow mapping/event_abstraction.csv, plus two events taken from the application record:
+# "Application Filed" (filing date) and "Patent Granted" (issue date).
+# A list item starting with "$" refers to a set defined under `sets`.
+#
+# Default semantics (template: timed_response), in the style of multi-perspective Declare:
+#   For an activation event e_k, find the first later event e_k' of the same case whose activity is in
+#   `target` or `supersede`. The activation is resolved if e_k' is a target and violated if, in addition,
+#   e_k' occurs after the deadline. Unresolved activations (superseded, or no such later event) are excluded.
+#   Violation rate = violated activations / resolved activations.
+# Norms that deviate from this template state their own rule under `rule`.
+
+conventions:
+  timestamps: >-
+    Examiner actions listed in mapping/mail_codes.csv are dated by their mailing date, i.e., the date of the
+    first matching mail-room code on or after the record date and within 60 days. Unmatched actions and all
+    other events keep their record date.
+  ordering: Events are ordered by date and, within a date, by tie_order in mapping/event_abstraction.csv.
+  deadline: Calendar months added to the date of the activation, plus grace_days.
+  grace_days: Applicant deadlines carry three days for periods that end on weekends or holidays.
+  exclusions: Events dated before 1990 or after 2026 (corrupt records) are dropped.
+
+sets:
+  examiner_actions:
+    - "Restriction Requirement"
+    - "Non-Final Rejection"
+    - "Final Rejection"
+    - "Advisory Action"
+    - "Quayle Action"
+    - "Notice of Allowance"
+    - "Examiner's Answer"
+    - "AFCP Considered"
+    - "AFCP Denied"
+  merits_actions:
+    - "Restriction Requirement"
+    - "Non-Final Rejection"
+    - "Final Rejection"
+    - "Notice of Allowance"
+    - "Quayle Action"
+  reply_required_actions:
+    - "Non-Final Rejection"
+    - "Final Rejection"
+    - "Restriction Requirement"
+    - "Quayle Action"
+  applicant_replies:
+    - "Response to Non-Final"
+    - "Response to Final"
+    - "Election Response"
+    - "Response to Quayle"
+    - "RCE Filed"
+    - "Notice of Appeal"
+    - "Pre-Appeal Request"
+    - "AFCP Request"
+  replies_awaiting_action:
+    - "Response to Non-Final"
+    - "Response to Final"
+    - "Election Response"
+    - "Response to Quayle"
+    - "RCE Filed"
+  board_decisions:
+    - "PTAB: Affirmed"
+    - "PTAB: Affirmed in Part"
+    - "PTAB: Reversed"
+    - "PTAB: New Grounds"
+    - "Appeal Dismissed"
+  closing_actions:
+    - "Final Rejection"
+    - "Advisory Action"
+    - "AFCP Considered"
+    - "AFCP Denied"
+    - "Notice of Allowance"
+    - "Quayle Action"
+    - "Examiner's Answer"
+    - "Pre-Appeal: Proceed"
+    - "$board_decisions"
+  abandonments:
+    - "Abandoned: No Response"
+    - "Abandoned: Issue Fee Unpaid"
+    - "Abandoned: After Appeal"
+    - "Abandoned: Express"
+    - "Abandoned: Formalities"
+
+norms:
+  - id: L1
+    source: "35 U.S.C. 133"
+    party: applicant
+    description: An action that requires a reply is answered within six months; otherwise the application is abandoned (hard stop).
+    template: timed_response
+    activation: ["$reply_required_actions"]
+    target: ["$applicant_replies"]
+    supersede: ["$abandonments", "$examiner_actions", "Patent Granted"]
+    deadline: {months: 6, grace_days: 3}
+
+  - id: R1
+    source: "37 CFR 1.134, 1.136(a)"
+    party: applicant
+    description: A reply filed more than three months after a rejection requires a paid extension of time.
+    template: conditional_presence
+    activation: ["Non-Final Rejection", "Final Rejection"]
+    target: ["$applicant_replies"]
+    supersede: ["$abandonments", "$examiner_actions", "Patent Granted"]
+    deadline: {months: 3, grace_days: 3}
+    required: ["Extension of Time"]
+    rule: >-
+      Activations are the resolved activations (as in L1) whose reply falls after the deadline. An activation is
+      violated if no required event occurs after the activation and no later than three days after the reply.
+      Restriction requirements and Quayle actions are excluded because they set different reply periods.
+
+  - id: R2
+    source: "37 CFR 1.114"
+    party: applicant
+    description: A request for continued examination is filed only after prosecution has been closed.
+    template: precedence
+    activation: ["RCE Filed"]
+    reference: ["$examiner_actions", "$board_decisions"]
+    allowed: ["$closing_actions"]
+    rule: >-
+      For each activation, take the last earlier event whose activity is in `reference`. The activation is
+      violated if that event is not in `allowed`.
+
+  - id: R3
+    source: "37 CFR 1.311"
+    party: applicant
+    description: The issue fee is paid within three months of the notice of allowance (not extendable).
+    template: timed_response
+    activation: ["Notice of Allowance"]
+    target: ["Issue Fee Paid"]
+    supersede: ["RCE Filed", "Withdrawal of Allowance", "$abandonments", "$examiner_actions"]
+    deadline: {months: 3, grace_days: 3}
+
+  - id: A1
+    source: "35 U.S.C. 154(b)(1)(A)(i)"
+    party: office
+    description: The first action is mailed within 14 months of filing.
+    template: timed_response
+    scope: Applications that are not national-stage entries.
+    activation: ["Application Filed"]
+    target: ["$merits_actions"]
+    supersede: []
+    deadline: {months: 14, grace_days: 0}
+    note: Applications abandoned before any action on the merits have no target and are unresolved.
+
+  - id: A2
+    source: "35 U.S.C. 154(b)(1)(A)(ii)"
+    party: office
+    description: The Office acts within four months of a reply or a request for continued examination.
+    template: timed_response
+    activation: ["$replies_awaiting_action"]
+    target: ["$examiner_actions"]
+    supersede: ["$abandonments", "Patent Granted"]
+    deadline: {months: 4, grace_days: 0}
+
+  - id: A3
+    source: "35 U.S.C. 154(b)(1)(A)(iii)"
+    party: office
+    description: The Office acts within four months of a board decision that reverses the examiner in whole or in part.
+    template: timed_response
+    activation: ["PTAB: Reversed", "PTAB: Affirmed in Part"]
+    target:
+      - "Restriction Requirement"
+      - "Non-Final Rejection"
+      - "Final Rejection"
+      - "Advisory Action"
+      - "Quayle Action"
+      - "Notice of Allowance"
+      - "Examiner's Answer"
+    supersede: ["$abandonments", "Patent Granted"]
+    deadline: {months: 4, grace_days: 0}
+
+  - id: A4
+    source: "35 U.S.C. 154(b)(1)(A)(iv)"
+    party: office
+    description: The patent issues within four months of payment of the issue fee.
+    template: timed_response
+    activation: ["Issue Fee Paid"]
+    target: ["Patent Granted"]
+    supersede: ["$examiner_actions", "RCE Filed", "Withdrawal of Allowance"]
+    deadline: {months: 4, grace_days: 0}
+
+  - id: B
+    source: "35 U.S.C. 154(b)(1)(B)"
+    party: office
+    description: The patent issues within three years of filing.
+    template: timed_response
+    scope: Granted applications that are not national-stage entries.
+    activation: ["Application Filed"]
+    target: ["Patent Granted"]
+    supersede: []
+    deadline: {months: 36, grace_days: 0}
+    variants:
+      gross: Days from filing to grant.
+      net: >-
+        Gross days minus, for each "RCE Filed", the days to the next "Notice of Allowance" or "Patent Granted".
+        Appeal periods and applicant delays are not subtracted.
+
+  - id: O1
+    source: "MPEP 706.07(a)"
+    party: office
+    description: After a reply to a non-final rejection, the next action on the merits is normally final.
+    template: not_response
+    activation: ["Response to Non-Final"]
+    target: ["Non-Final Rejection", "Final Rejection", "Notice of Allowance", "Quayle Action"]
+    supersede: ["Restriction Requirement", "$abandonments", "RCE Filed", "Patent Granted"]
+    forbidden: ["Non-Final Rejection"]
+    rule: A resolved activation is violated if the resolving target is in `forbidden`. No deadline applies.
+
+  - id: O2
+    source: "MPEP 710.06"
+    party: office
+    description: Office actions do not need to be withdrawn or vacated.
+    template: not_response
+    activation: ["$examiner_actions"]
+    target: ["$examiner_actions", "Office Action Withdrawn"]
+    supersede: []
+    forbidden: ["Office Action Withdrawn"]
+    rule: >-
+      An activation is violated if the first later event in `target` is in `forbidden`. Every activation enters the
+      denominator, including those with no later event in `target`.
