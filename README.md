@@ -1,11 +1,11 @@
-# Event abstraction and timed norms for USPTO patent prosecution
+# Event abstraction and norms for USPTO patent prosecution
 
 This repository accompanies the anonymized article. It provides the two inputs that turn raw USPTO transaction records into an event log and check that log against the norms governing examination:
 
 - `mapping/`: the event abstraction, which maps 96 PatEx transaction codes to 37 core and 19 friction activities (Table S1 of the article), and the mail-room codes that supply the mailing dates of examiner actions.
-- `norms/`: the eleven timed norms of the article (Table 1) in machine-readable form, with the activation, target and superseding events and the deadline of each norm.
+- `norms/`: the eleven norms of the article (Table 1) in machine-readable form, with the activation, target and superseding events and the deadline of each norm.
 
-The analysis code is not included and is available from the author upon reasonable request.
+The analysis code is not included.
 
 ## Data source
 
@@ -16,7 +16,7 @@ USPTO Patent Examination Research Dataset (PatEx), 2025 release, USPTO Open Data
 ```
 mapping/event_abstraction.csv   PatEx transaction code -> activity
 mapping/mail_codes.csv          mail-room codes that date examiner actions
-norms/norms.yaml                timed norms (L1, R1-R3, A1-A4, B, O1, O2)
+norms/norms.yaml                norms (L1, R1-R3, A1-A4, B, O1, O2)
 ```
 
 ## Event abstraction
@@ -39,7 +39,7 @@ The event log is built as follows.
 
 Deadlines run from the mailing date of an action. For the examiner actions listed in `mail_codes.csv`, the record date is therefore replaced by the date of the first matching mail-room code on or after it, within 60 days. Actions without a match keep their record date.
 
-## Timed norms
+## Norms
 
 | Id | Source | Party | Activation -> target (deadline) |
 |---|---|---|---|
@@ -55,6 +55,10 @@ Deadlines run from the mailing date of an action. For the examiner actions liste
 | O1 | MPEP 706.07(a) | Office | Reply to a non-final rejection -> next action is not another non-final rejection |
 | O2 | MPEP 710.06 | Office | Office action not withdrawn or vacated |
 
-Each norm is a timed response constraint in the style of multi-perspective Declare. For an activation, the first later event in the target or superseding set is located. The activation is resolved if that event is a target and violated if it occurs after the deadline. Superseded activations are excluded, and the violation rate is the share of violated activations among resolved ones. Applicant deadlines carry three days of grace for periods that end on weekends or holidays. R1, R2, B, O1 and O2 depart from this template, and `norms.yaml` states their rules. Activity sets referenced with `$` are defined at the top of the file.
+Each norm is a constraint in multi-perspective Declare. L1, R3, A1-A4 and B are timed responses, R1 and R2 are precedences, and O1 and O2 are negated responses.
+
+For a timed response, the first later event in the target or superseding set is located. The activation is resolved if that event is a target and violated if it occurs after the deadline. Superseded activations are excluded, and the violation rate is the share of violated activations among resolved ones. A precedence is evaluated by searching for the target before the activation, and a negated response counts the occurrence of the target as a violation.
+
+Applicant deadlines carry three days of grace for periods that end on weekends or holidays. B is computed both gross and net of the time between an RCE and the subsequent allowance. The rules of each norm are stated in `norms.yaml`, and activity sets referenced with `$` are defined at the top of that file.
 
 Released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
